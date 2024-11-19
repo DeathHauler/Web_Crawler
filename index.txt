@@ -1,0 +1,5 @@
+https://webscraper.io/test-sites/e-commerce/allinone -> storage/https___webscraper.io_test-sites_e-commerce_allinone.html
+https://webscraper.io/test-sites/e-commerce/allinone -> storage/https___webscraper.io_test-sites_e-commerce_allinone.html
+https://webscraper.io/test-sites/e-commerce/allinone -> storage/https___webscraper.io_test-sites_e-commerce_allinone.html
+https://webscraper.io/test-sites/e-commerce/allinone -> storage/https___webscraper.io_test-sites_e-commerce_allinone.html
+https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html -> storage/https___doc.rust-lang.org_book_ch02-00-guessing-game-tutorial.html.html
