@@ -1,41 +1,34 @@
-
 #include <iostream>
 #include <vector>
+#include <cstring>
 #include <fstream>
 #include <string>
 #include <curl/curl.h>
-#include <regex>
 #include <filesystem>
 #include <libxml/HTMLparser.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
-#include <map>
 #include <queue>
-#include <bitset>
+#include <set>
 #include <sstream>
 #include <openssl/sha.h>
+#include <iomanip>
 
-struct URL
-{
+struct URL {
     char data[100];
 };
 
 std::string hashURL(const std::string &url) {
-    // Initialize a SHA256 context
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_CTX sha256;
     SHA256_Init(&sha256);
-
-    // Hash the input URL
     SHA256_Update(&sha256, url.c_str(), url.size());
     SHA256_Final(hash, &sha256);
 
-    // Convert hash to hexadecimal string
     std::ostringstream hexStream;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         hexStream << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
     }
-
     return hexStream.str();
 }
 
@@ -70,7 +63,6 @@ void traverseHTML(xmlNode *node, std::vector<std::string> &hrefs) {
     }
 }
 
-
 void parseHTML(const std::string &filename, std::vector<std::string> &hrefs) {
     htmlDocPtr doc = htmlReadFile(filename.c_str(), nullptr, HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
     if (!doc) {
@@ -84,10 +76,12 @@ void parseHTML(const std::string &filename, std::vector<std::string> &hrefs) {
     xmlCleanupParser();
 }
 
+void getFile(const URL &target, const std::string &sessionFolder) {
+    // Ensure the session folder exists
+    std::filesystem::create_directory(sessionFolder);
 
-void getFile(const URL &target int mode=0) {
-    std::filesystem::create_directory("storage");
-    std::string filename = generateFilename(target.data);
+    // Generate the file name using the hashed URL and store it in the session folder
+    std::string filename = sessionFolder + "/" + hashURL(target.data) + ".html";
 
     std::ofstream file(filename, std::ios::binary);
     if (!file) {
@@ -112,32 +106,88 @@ void getFile(const URL &target int mode=0) {
 
     curl_easy_cleanup(handle);
     file.close();
+
+    std::cout << "Page saved to: " << filename << "\n";
 }
 
-void runHTML (URL* input)
-{
+void runHTML(URL *input) {
     std::string filename = generateFilename(input->data);
     std::string command = "firefox file:///home/deathhauler/projects/web_crawler/" + filename;
     std::system(command.c_str());
 }
 
+std::string makeAbsoluteURL(const std::string &baseURL, const std::string &relativeURL) {
+    xmlChar *absolute = xmlBuildURI(reinterpret_cast<const xmlChar *>(relativeURL.c_str()), 
+                                    reinterpret_cast<const xmlChar *>(baseURL.c_str()));
+    std::string absoluteURL;
+    if (absolute) {
+        absoluteURL = reinterpret_cast<const char *>(absolute);
+        xmlFree(absolute);
+    }
+    return absoluteURL;
+}
 
-int main()
-{
+void crawl(URL startURL, int depth, std::set<std::string> &visited, const std::string &sessionFolder) {
+    std::queue<std::pair<std::string, int>> queue;
+    queue.push({startURL.data, 0});
+
+    while (!queue.empty()) {
+        auto [currentURL, currentDepth] = queue.front();
+        queue.pop();
+
+        if (visited.find(currentURL) != visited.end() || currentDepth > depth) {
+            continue;
+        }
+        visited.insert(currentURL);
+
+        std::cout << "Crawling: " << currentURL << " (Depth: " << currentDepth << ")\n";
+
+        URL target;
+        strncpy(target.data, currentURL.c_str(), sizeof(target.data) - 1);
+        target.data[sizeof(target.data) - 1] = '\0';
+
+        getFile(target, sessionFolder);
+
+        std::string filename = sessionFolder + "/" + hashURL(currentURL) + ".html";
+        std::vector<std::string> hrefs;
+        parseHTML(filename, hrefs);
+
+        for (const auto &link : hrefs) {
+            std::string absoluteLink = makeAbsoluteURL(currentURL, link);
+
+            if (!absoluteLink.empty() && visited.find(absoluteLink) == visited.end()) {
+                queue.push({absoluteLink, currentDepth + 1});
+            }
+        }
+    }
+}
+
+
+int main() {
     URL target;
-    std::cout << "Enter URL to download: ";
+    std::cout << "Enter URL to start crawling: ";
     std::cin >> target.data;
 
-    // get File
+    int depth;
+    std::cout << "Enter crawl depth: ";
+    std::cin >> depth;
+
+    std::set<std::string> visited;
+
+    // Create a unique sub-folder for this crawl session
+    std::string sessionFolder = "storage/session_" + std::to_string(std::time(nullptr));
+    std::filesystem::create_directory(sessionFolder);
+
+    // Initialize cURL globally
     curl_global_init(CURL_GLOBAL_ALL);
-    getFile(target);
+
+    // Start crawling
+    crawl(target, depth, visited, sessionFolder);
+
+    // Cleanup cURL globally
     curl_global_cleanup();
 
-    // Parse for CSS (In General Parse)
-    std::vector<std::string> hrefs;
-    parseHTML(target.data , hrefs);
+    std::cout << "All pages saved in folder: " << sessionFolder << "\n";
 
-    // Run File on Firefox
-    runHTML(&target);
     return 0;
 }

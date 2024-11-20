@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html><!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    
+    
+    <title>Underjord | How I use Erlang Hot Code Updates</title>
+    
+    
+    <meta name="Description" content="One of the Erlang ecosystem&#39;s spiciest nerd snipes are hot code updates. Because it can do it. In ways that almost no other runtime can. I use Elixir which builds on Erlang and has the same capabilities.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="How I use Erlang Hot Code Updates" />
+    <meta property="og:site_name" content="Underjord" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://underjord.io/how-i-use-erlang-hot-code-updates.html" />
+    <meta property="og:image" content="https://underjord.io/img/preview.png" />
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@underjord1">
+    <meta name="twitter:creator" content="@lawik">
+    <meta name="twitter:title" content="How I use Erlang Hot Code Updates">
+    <meta name="twitter:description" content="One of the Erlang ecosystem&#39;s spiciest nerd snipes are hot code updates. Because it can do it. In ways that almost no other runtime can. I use Elixir which builds on Erlang and has the same capabilities.">
+    <meta name="twitter:image" content="https://underjord.io/img/preview.png">
+
+    
+    <link rel="preload" as="font" href="/fonts/FiraCode.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-LightItalic.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-Regular.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-BoldItalic.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-BlackItalic.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-Bold.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-Italic.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/Lato-Light.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/SpaceGrotesk-Bold.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/SpaceGrotesk-SemiBold.woff2" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" as="font" href="/fonts/SpaceGrotesk-Medium.woff2" type="font/woff2" crossorigin="anonymous">
+
+    
+    <link rel="icon" href="https://underjord.io/img/favicon.ico">
+    
+    <link rel="icon" href="https://underjord.io/img/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" href="https://underjord.io/img/favicon-32x32.png" sizes="32x32">
+
+
+    
+    <link rel="shortcut icon" sizes="196x196" href="https://underjord.io/img/android-chrome-192x192.png">
+    <link rel="shortcut icon" sizes="196x196" href="https://underjord.io/img/android-chrome-512x512.png">
+
+
+    
+    <link rel="apple-touch-icon" href="https://underjord.io/img/apple-touch-icon.png">
+
+
+    <link rel="alternate" type="application/rss+xml" href="https://underjord.io/feed.xml" />
+
+    <link rel="stylesheet" type="text/css" href="https://underjord.io/css/style.css?bust=1" />
+
+    <script defer type="module" src="https://underjord.io/js/script.js"></script>
+</head>
+
+<body><body><header>
+    <a class="logo" href="https://underjord.io/" title="Return to start">
+        <div class='tt'>
+            <img src="https://underjord.io/img/logo2.svg" alt="Underjord">
+            <span>Underjord</span>
+        </div>
+    </a>
+    <div class='divide head-divide'></div>
+    <hr />
+    <nav><a href="/blog.html">Blog</a><a href="/services.html">Services</a><a href="/newsletter.html">Newsletter</a><a href="https://www.youtube.com/c/underjord">YouTube</a><a href="/podcasts.html">Podcasts</a><a href="/jobs.html">Elixir Jobs</a></nav>
+</header>
+
+<div class="glyphs">
+    <a class="glyph" href="/feed.xml" title="RSS" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+        </svg>
+    </a>
+    <a class="glyph" href="/newsletter.html" title="Newsletter" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
+        </svg>
+    </a>
+    <a class="glyph" href="mailto:lars@underjord.io" title="Email (lars@underjord.io)" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    </a>
+    <a class="glyph" href="https://twitter.com/lawik" title="Twitter" target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+        </svg>
+    </a>
+    <a class="glyph" href="https://www.youtube.com/channel/UC0JZZAJ_e6xc41BLPO8MCKg/featured" title="YouTube"
+        target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+    </a>
+    <a class="glyph" href="https://regprog.com" title="Podcast: Regular Programming" target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+    </a>
+</div><div id="content">
+<main>
+    <hr />
+    <article>
+        <h1 class='blog-title'>How I use Erlang Hot Code Updates</h1>
+        <small class="blog-post-date">2024-11-19</small>
+        <p style="font-size: 1em; font-style: italic;">
+            Underjord is a <a href="/team.html">tiny, wholesome team</a> doing Elixir consulting and contract work. If
+            you
+            like
+            the writing you should really try the code. See our <a href="/services.html">services</a> for more
+            information.
+        </p>
+        <p>One of the Erlang ecosystem&rsquo;s spiciest nerd snipes are hot code updates. Because it can do it. In ways that almost no other runtime can.</p>
+<p>I use Elixir which builds on Erlang and has the same capabilities.</p>
+<p>The standard way of doing Elixir releases via <code>mix release</code> does not support Erlang hot code updates. As in, it will not generate the necessary files for you. And if you do want to do it there are several blog posts you need to stitch together or you need to use the Erlang docs in great detail. Learn You Some Erlang has <a href="https://learnyousomeerlang.com/relups">documented much of it</a> of course. AppSignal also has a neat guide on <a href="https://blog.appsignal.com/2021/07/27/a-guide-to-hot-code-reloading-in-elixir.html">hot code reloading in Elixir</a>.</p>
+<p>Bryan Hunter and Chris Keathley are both people I listen when they speak because it tends to be interesting, challenging and something I just might not have heard before. Both have described hot code updates as something that people should learn and use. I imagine Whatsapp&rsquo;s initial engineering crew would agree. They did pretty well.</p>
+<p>Of course we do use it. But mostly for trivial things.</p>
+<p>Anyone using IEx <code>r MyModule</code> or <code>recompile</code> are doing hot code updates. But reloading a module in development on you local machine doesn&rsquo;t feel all that spicy. It is cool and useful but feels like an incremental compile or watcher/builder type of thing.</p>
+<p>I use it constantly <a href="https://underjord.io/unpacking-elixir-iot-embedded-nerves.html">with Nerves</a>. When developing on an embedded Elixir device and needing to tune some numbers, or reworking a module, pasting into the IEx is faster than uploading new firmware and waiting for the reboot. I stop and start parts of the applications or just terminate the relevant GenServer if I need a state reset.</p>
+<p>I&rsquo;ve also used it for remote devices over <a href="https://github.com/nerves-hub/nerves_hub_web">NervesHub</a>&rsquo;s built in web console that offers an IEx prompt. When debugging a misbehaving Real Time Clock it was pretty nice to just paste chunks of utility functions and relevant I2C-calls over to the device to get clear answers about what it was doing.</p>
+<p>I&rsquo;d love to see more tooling for the full-blown delivery of hot code updates on top of Elixir&rsquo;s <code>mix release</code> tooling. Or in the vein of the predecessor <code>distillery</code>. I don&rsquo;t think there are any shortcuts for doing a correct hot code update. Much like database migrations they require care. And you&rsquo;ll need to know how you dependencies react to hot code updates and many other interesting topics.</p>
+<p>This was just a quick one in case people are curious how Erlang&rsquo;s hot code updates are actually used, day-to-day, in Elixir.</p>
+<p>If you have comments or questions you can find me on the fediverse via <a href="https://twitter.com/lawik">@lawik</a> or email me at <a href="mailto:lars@underjord.io">lars@underjord.io</a>.</p>
+
+        <p style="font-size: 1em; font-style: italic;">
+            Underjord is a <a href="/team.html">4 people team</a> doing Elixir consulting and contract work. If you like
+            the writing you should really try the code. See our <a href="/services.html">services</a> for more
+            information.
+        </p>
+        <p style="font-size: 1em; font-style: italic;">
+            Note: Or try the videos on <a href="https://youtube.com/c/underjord">the YouTube
+                channel</a>.
+        </p>
+        <p></p>
+    </article>
+
+    <hr />
+
+    
+
+    <hr />
+</main>
+
+        </div>
+<footer>
+    
+
+
+    <section class="following">
+
+        <div id="newsletter-push" class="newsletter">
+            <h2 class="tight">Newsletter</h2>
+
+            <p>I share my thoughts on building software sustainably and effectively in my newsletter.</p>
+
+            <p>No tracking. No cost. And a <a href="/newsletter-sample.html">sample</a> to read before signing up.</p>
+
+            <p>I try to respect my reader's time and attention. The sign-up may fail if you have your adblocker on.
+                Because reasons.</p>
+
+            <form id="subForm" class="js-cm-form" action="https://www.createsend.com/t/subscribeerror?description="
+                method="post"
+                data-id="2BE4EF332AA2E32596E38B640E9056195A3630ACEE74E46DABAFA4A708AFF91A3AA2262BA77BC028E721DB2E934E724BF62205A56A83543A8775BFFB6F2D9244">
+                <p>
+                    <label for="fieldEmail">Email</label>
+                    <input id="fieldEmail" name="cm-sdyilu-sdyilu" type="email" class="js-cm-email-input"
+                        placeholder="example@mail.dev" required />
+                </p>
+                <div class="checkbox-holders">
+                    <div class="checkbox-holder">
+                        <input id="cm-privacy-consent" name="cm-privacy-consent" required type="checkbox" />
+                        <label for="cm-privacy-consent">I agree to be emailed for the purposes of this
+                            newsletter</label>
+                        <input id="cm-privacy-consent-hidden" name="cm-privacy-consent-hidden" type="hidden"
+                            value="true" />
+                    </div>
+
+                    <div class="checkbox-holder">
+                        <input id="good-faith-indicator" name="good-faith-indicator" required checked="checked"
+                            disabled="disabled" type="checkbox" />
+                        <label for="good-faith-indicator">I refuse to have my email activity tracked</label>
+                        
+                        
+                        <input id="cm-privacy-email-hidden" name="cm-privacy-email-hidden" type="hidden" value="true" />
+                    </div>
+                </div>
+                <p>
+                    <button class="js-cm-submit-button" type="submit">Subscribe</button>
+                </p>
+            </form>
+            <script type="text/javascript"
+                src="https://js.createsend1.com/javascript/copypastesubscribeformlogic.js"></script>
+
+            <p>I use Campaign Monitor and do my best to strangle the tracking-features out of it. The form does use an
+                arbitrary bit of JS for the sign-up that I know little about. I've set this up so you will be flagged
+                for no tracking. We are in the EU, work along the GDPR and tracking user data is a liability that I
+                prefer to avoid.</p>
+        </div>
+
+        <div class="rss">
+            <h2 class="tight">RSS</h2>
+            <p>I have <a href="/feed.xml">a feed for your newsreader right here</a>.</p>
+        </div>
+    </section>
+</footer>
+<label class="magic-switch">
+            <input id="magic-switch" type="checkbox" value="magic" />
+            <div class="check"></div>
+            <div class="text">Magic enabled</div>
+        </label>
+        <div id="magic-counter"></div>
+        <div class="page-counts">
+        </div>
+        <div id="magic-box"></div>
+        <script type="module" src="https://underjord.io/js/script.js"></script>
+    </body>
+</html>
