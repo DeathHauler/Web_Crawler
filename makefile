@@ -1,7 +1,7 @@
 OBJS = code/main.cpp
 CC = g++
 COMPILER_FLAGS = -w $(xml2-config --cflags --libs)
-LINKER_FLAGS = -lcurl -lxml2 -lcrypto
+LINKER_FLAGS = -lcurl -lxml2 -lcrypto -lz
 OBJ_NAME = Web_Crawler
 all : compile run
 
